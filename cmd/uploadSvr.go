@@ -24,6 +24,7 @@ func headers(w http.ResponseWriter, r *http.Request) {
 }
 
 // upload can used by curl like:`curl -F "file=@./go_test.ipynb" http://127.0.0.1:9090/upload`
+// TODO: fix cannot uploading file via `--upload-file` to curl
 func upload(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("method:", r.Method) // Get the type of request
 	if r.Method == "POST" {
@@ -75,6 +76,6 @@ func main() {
 	http.HandleFunc("/headers", headers)
 	http.HandleFunc("/upload", upload)
 
-	err := http.ListenAndServe(":9090", nil)
+	err := http.ListenAndServe(":80", nil)
 	MyErrCheck.CheckErr(err, "ListenAndServe:", "")
 }
