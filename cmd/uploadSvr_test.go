@@ -9,9 +9,3 @@ func BenchmarkBytesMaskImprSrc(b *testing.B) {
 		RandStringBytesMaskImprSrc(n)
 	}
 }
-
-func BenchmarkRandomBase16String(b *testing.B) {
-	for i := 0; i < b.N; i++ {
-		randomBase16String(n)
-	}
-}

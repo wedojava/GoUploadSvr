@@ -7,8 +7,13 @@ import (
 	"math/rand"
 	"net/http"
 	"os"
+	"path"
+	"path/filepath"
 	"time"
 )
+
+// Where the uploaded files save to.
+const SubFolder = "files"
 
 func hello(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()                  // parse form data, default will not do that.
@@ -35,10 +40,10 @@ func upload(w http.ResponseWriter, r *http.Request) {
 		defer file.Close()
 		_, _ = fmt.Fprintf(w, "%v", handler.Header)
 		//TODO: if upload failure, delete the folder
-		saveFolder := "./files/ " + RandStringBytesMaskImprSrc(6) + "/"
+		saveFolder := path.Join(SubFolder, RandStringBytesMaskImprSrc(6))
 		err = os.MkdirAll(saveFolder, os.ModePerm)
 		MyErrCheck.CheckErr(err, "Create folder for save file", "Println")
-		f, err := os.OpenFile(saveFolder+handler.Filename, os.O_WRONLY|os.O_CREATE, 0666)
+		f, err := os.OpenFile(filepath.Join(saveFolder, handler.Filename), os.O_WRONLY|os.O_CREATE, 0666)
 		MyErrCheck.CheckErr(err, "upload:OpenFile", "Println")
 		defer f.Close()
 		_, err = io.Copy(f, file)
