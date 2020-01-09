@@ -1,15 +1,15 @@
 package main
 
 import (
+	"flag"
 	"fmt"
-	"github.com/wedojava/MyErrCheck"
+	"github.com/wedojava/MyTools"
 	"io"
-	"math/rand"
+	"log"
 	"net/http"
 	"os"
 	"path"
 	"path/filepath"
-	"time"
 )
 
 // Where the uploaded files save to.
@@ -36,51 +36,32 @@ func upload(w http.ResponseWriter, r *http.Request) {
 		r.ParseMultipartForm(32 << 20)
 		//r.Header.Set("Content-Type", "multipart/form-data")
 		file, handler, err := r.FormFile("file")
-		MyErrCheck.CheckErr(err, "upload:FormFile", "Println")
+		MyTools.CheckErr(err, "upload:FormFile", "Println")
 		defer file.Close()
 		_, _ = fmt.Fprintf(w, "%v", handler.Header)
 		//TODO: if upload failure, delete the folder
-		saveFolder := path.Join(SubFolder, RandStringBytesMaskImprSrc(6))
+		saveFolder := path.Join(SubFolder, MyTools.RandStringBytesMaskImprSrc(6))
 		err = os.MkdirAll(saveFolder, os.ModePerm)
-		MyErrCheck.CheckErr(err, "Create folder for save file", "Println")
+		MyTools.CheckErr(err, "Create folder for save file", "Println")
 		f, err := os.OpenFile(filepath.Join(saveFolder, handler.Filename), os.O_WRONLY|os.O_CREATE, 0666)
-		MyErrCheck.CheckErr(err, "upload:OpenFile", "Println")
+		MyTools.CheckErr(err, "upload:OpenFile", "Println")
 		defer f.Close()
 		_, err = io.Copy(f, file)
-		MyErrCheck.CheckErr(err, "upload:Copy", "Println")
+		MyTools.CheckErr(err, "upload:Copy", "Println")
 		fmt.Println("Uploading complete.")
 	}
 }
 
-func RandStringBytesMaskImprSrc(n int) string {
-	var src = rand.NewSource(time.Now().UnixNano())
-	const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
-	const (
-		letterIdxBits = 6                    // 6 bits to represent a letter index
-		letterIdxMask = 1<<letterIdxBits - 1 // All 1-bits, as many as letterIdxBits
-		letterIdxMax  = 63 / letterIdxBits   // # of letter indices fitting in 63 bits
-	)
-	b := make([]byte, n)
-	// A src.Int63() generates 63 random bits, enough for letterIdxMax characters!
-	for i, cache, remain := n-1, src.Int63(), letterIdxMax; i >= 0; {
-		if remain == 0 {
-			cache, remain = src.Int63(), letterIdxMax
-		}
-		if idx := int(cache & letterIdxMask); idx < len(letterBytes) {
-			b[i] = letterBytes[idx]
-			i--
-		}
-		cache >>= letterIdxBits
-		remain--
-	}
-	return string(b)
-}
-
+// TODO: 1. encrypt function need to be coded.
+// TODO: 2. rar db.json for download
 func main() {
+	port := flag.String("p", "8100", "port to serve on")
+	action := flag.String("a", "upload", "default is upload, so use http://yourwebsite/upload for upload action.")
+	flag.Parse()
+
 	http.HandleFunc("/", hello)
 	http.HandleFunc("/headers", headers)
-	http.HandleFunc("/upload", upload)
+	http.HandleFunc("/"+*action, upload)
 
-	err := http.ListenAndServe(":80", nil)
-	MyErrCheck.CheckErr(err, "ListenAndServe:", "")
+	log.Fatal(http.ListenAndServe(":"+*port, nil))
 }
