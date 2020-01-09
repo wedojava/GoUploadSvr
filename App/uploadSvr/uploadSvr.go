@@ -52,8 +52,7 @@ func upload(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// TODO: 1. encrypt function need to be coded.
-// TODO: 2. rar db.json for download
+// TODO:  rar db.json for download
 func main() {
 	port := flag.String("p", "8100", "port to serve on")
 	action := flag.String("a", "upload", "default is upload, so use http://yourwebsite/upload for upload action.")
