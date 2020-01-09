@@ -2,7 +2,7 @@ package main
 
 import (
 	"encoding/json"
-	"github.com/wedojava/MyErrCheck"
+	"github.com/wedojava/MyTools"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -10,25 +10,27 @@ import (
 
 type File struct {
 	Filename string `json:"filename"`
+	Size     int64  `json:"size"`
 	ModTime  int64  `json:"mod_time"`
 }
 
 var Files []File
 
 func GetFileList() []File {
-	err := filepath.Walk("../"+SubFolder, visit)
-	MyErrCheck.Check(err)
+	err := filepath.Walk(filepath.Join("..", "downloadSvr", SubFolder), visit)
+	MyTools.Check(err)
 	return Files
 }
 
 func visit(p string, info os.FileInfo, err error) error {
-	MyErrCheck.Check(err)
+	MyTools.Check(err)
 	if !info.IsDir() {
 		//loc := time.FixedZone("UTC+8", +8*60*60)
 		//t := info.ModTime().In(loc)
 		//t.Format(time.RFC1123Z)
 		f := File{
 			Filename: p,
+			Size:     info.Size(),
 			ModTime:  info.ModTime().Unix(),
 		}
 		Files = append(Files, f)
@@ -38,24 +40,25 @@ func visit(p string, info os.FileInfo, err error) error {
 
 // SaveFileLstInfo is the function to save uploaded file list information.
 // It's write action truncates the file before writing.
-func SaveFileLstInfo(files []File, dbFile string) {
+func SaveFileLstInfo(files []File, dbFilename string) {
 	if len(files) > 0 {
 		b, err := json.Marshal(files)
-		MyErrCheck.Check(err)
-		err = ioutil.WriteFile(dbFile, b, os.ModePerm)
-		MyErrCheck.CheckPanic(err)
+		MyTools.Check(err)
+		b = []byte(MyTools.AESEncrypt(string(b), "12345678901234567890123456789012"))
+		err = ioutil.WriteFile(dbFilename, b, os.ModePerm)
+		MyTools.CheckPanic(err)
 		//if _, err := os.Stat(dbFile); os.IsNotExist(err) {
 		//	f, err := os.Create(dbFile)
-		//	MyErrCheck.CheckPanic(err)
+		//	MyTools.CheckPanic(err)
 		//	defer f.Close()
 		//	_, err = f.Write(b)
-		//	MyErrCheck.CheckPanic(err)
+		//	MyTools.CheckPanic(err)
 		//}else{
 		//	f, err := os.Open(dbFile)
-		//	MyErrCheck.CheckPanic(err)
+		//	MyTools.CheckPanic(err)
 		//	defer f.Close()
 		//	_, err = f.Write(b)
-		//	MyErrCheck.CheckPanic(err)
+		//	MyTools.CheckPanic(err)
 		//}
 	}
 }

@@ -16,5 +16,5 @@ func TestGetFileList(t *testing.T) {
 
 func TestSaveFileLstInfo(t *testing.T) {
 	files := GetFileList()
-	SaveFileLstInfo(files, "../test.json")
+	SaveFileLstInfo(files, "../db.json")
 }
