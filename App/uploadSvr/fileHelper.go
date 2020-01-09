@@ -47,18 +47,5 @@ func SaveFileLstInfo(files []File, dbFilename string) {
 		b = []byte(MyTools.AESEncrypt(string(b), "12345678901234567890123456789012"))
 		err = ioutil.WriteFile(dbFilename, b, os.ModePerm)
 		MyTools.CheckPanic(err)
-		//if _, err := os.Stat(dbFile); os.IsNotExist(err) {
-		//	f, err := os.Create(dbFile)
-		//	MyTools.CheckPanic(err)
-		//	defer f.Close()
-		//	_, err = f.Write(b)
-		//	MyTools.CheckPanic(err)
-		//}else{
-		//	f, err := os.Open(dbFile)
-		//	MyTools.CheckPanic(err)
-		//	defer f.Close()
-		//	_, err = f.Write(b)
-		//	MyTools.CheckPanic(err)
-		//}
 	}
 }
