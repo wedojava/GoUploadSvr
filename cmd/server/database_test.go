@@ -1,4 +1,4 @@
-package main
+package server
 
 import (
 	"testing"
@@ -16,5 +16,5 @@ func TestGetFileList(t *testing.T) {
 
 func TestSaveFileLstInfo(t *testing.T) {
 	files := GetFileList()
-	SaveFileLstInfo(files, "../db.json")
+	SaveFileLstInfo(files, "../db")
 }

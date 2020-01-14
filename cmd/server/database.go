@@ -1,8 +1,8 @@
-package main
+package server
 
 import (
 	"encoding/json"
-	"github.com/wedojava/MyTools"
+	"github.com/wedojava/mytools"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -18,12 +18,12 @@ var Files []File
 
 func GetFileList() []File {
 	err := filepath.Walk(filepath.Join("..", "downloadSvr", SubFolder), visit)
-	MyTools.Check(err)
+	mytools.Check(err)
 	return Files
 }
 
 func visit(p string, info os.FileInfo, err error) error {
-	MyTools.Check(err)
+	mytools.Check(err)
 	if !info.IsDir() {
 		//loc := time.FixedZone("UTC+8", +8*60*60)
 		//t := info.ModTime().In(loc)
@@ -42,10 +42,11 @@ func visit(p string, info os.FileInfo, err error) error {
 // It's write action truncates the file before writing.
 func SaveFileLstInfo(files []File, dbFilename string) {
 	if len(files) > 0 {
+		//TODO: save it to csv?
 		b, err := json.Marshal(files)
-		MyTools.Check(err)
-		b = []byte(MyTools.AESEncrypt(string(b), "12345678901234567890123456789012"))
+		mytools.Check(err)
+		b = []byte(mytools.AESEncrypt(string(b), "12345678901234567890123456789012"))
 		err = ioutil.WriteFile(dbFilename, b, os.ModePerm)
-		MyTools.CheckPanic(err)
+		mytools.CheckPanic(err)
 	}
 }
