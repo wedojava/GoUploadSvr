@@ -3,7 +3,7 @@ package server
 import (
 	"context"
 	"fmt"
-	"github.com/wedojava/mytools"
+	"github.com/wedojava/myencrypt"
 	"io"
 	"log"
 	"net/http"
@@ -31,18 +31,26 @@ func upload(w http.ResponseWriter, r *http.Request) {
 		r.ParseMultipartForm(32 << 20)
 		//r.Header.Set("Content-Type", "multipart/form-data")
 		file, handler, err := r.FormFile("file")
-		mytools.CheckErr(err, "upload:FormFile", "Println")
+		if err != nil {
+			fmt.Println("[-] [r.FormFile(\"file\")] Error: ", err)
+		}
 		defer file.Close()
 		_, _ = fmt.Fprintf(w, "%v", handler.Header)
 		//TODO: if upload failure, delete the folder
-		saveFolder := path.Join(SubFolder, mytools.RandStringBytesMaskImprSrc(6))
-		err = os.MkdirAll(saveFolder, os.ModePerm)
-		mytools.CheckErr(err, "Create folder for save file", "Println")
-		f, err := os.OpenFile(filepath.Join(saveFolder, handler.Filename), os.O_WRONLY|os.O_CREATE, 0666)
-		mytools.CheckErr(err, "upload:OpenFile", "Println")
+		saveFolder := path.Join(SubFolder, myencrypt.RandStringBytesMaskImprSrc(6))
+
+		if err = os.MkdirAll(saveFolder, os.ModePerm); err != nil {
+			fmt.Println("[-] [os.MkdirAll(saveFolder, os.ModePerm)] Error: ", err)
+		}
+		f, err := os.OpenFile(filepath.Join(saveFolder, handler.Filename),
+								os.O_WRONLY|os.O_CREATE, 0666)
+		if err != nil {
+			fmt.Println("[-] [upload:OpenFile] Error: ", err)
+		}
 		defer f.Close()
-		_, err = io.Copy(f, file)
-		mytools.CheckErr(err, "upload:Copy", "Println")
+		if _, err = io.Copy(f, file); err != nil {
+			fmt.Println("[-] [io.Copy(f, file)e] Error: ", err)
+		}
 		fmt.Println("Uploading complete.")
 	}
 }

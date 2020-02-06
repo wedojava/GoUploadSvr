@@ -5,7 +5,8 @@ package main
 import (
 	"encoding/json"
 	"flag"
-	"github.com/wedojava/mytools"
+	"fmt"
+	"github.com/wedojava/myencrypt"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -51,16 +52,20 @@ func main() {
 	}
 	// 2. unrar and decrypt it
 	data, err := ioutil.ReadFile(savePath)
-	mytools.CheckPanic(err)
-	strDB := mytools.AESDecrypt(string(data), "12345678901234567890123456789012")
+	if err != nil {
+		fmt.Println("[-] [ioutil.ReadFile(savePath)] Error: ", err)
+	}
+	strDB := myencrypt.AESDecrypt(string(data), "12345678901234567890123456789012")
 	// 3. generate a html file for show file list
 	var files []File
-	err = json.Unmarshal([]byte(strDB), &files)
-	mytools.CheckPanic(err)
+	if err = json.Unmarshal([]byte(strDB), &files); err != nil {
+		fmt.Println("[-] [json.Unmarshal([]byte(strDB), &files)] Error: ", err)
+	}
 	rawHtml := GenerateHtml(files)
 	// 4. Write to html file
-	err = ioutil.WriteFile("download.html", []byte(rawHtml), os.ModePerm)
-	mytools.CheckPanic(err)
+	if err = ioutil.WriteFile("download.html", []byte(rawHtml), os.ModePerm); err != nil {
+		fmt.Println("[-] [json.Unmarshal([]byte(strDB), &files)] Error: ", err)
+	}
 }
 
 func GenerateHtml(files []File) (fileList string) {
@@ -76,11 +81,15 @@ func GenerateHtml(files []File) (fileList string) {
 
 func GetDBFile(savePath, url string) error {
 	resp, err := http.Get(url)
-	mytools.Err(err)
+	if err != nil {
+		fmt.Println("[-] [http.Get(url)] Error: ", err)
+	}
 	defer resp.Body.Close()
 
 	out, err := os.Create(savePath)
-	mytools.Err(err)
+	if err != nil {
+		fmt.Println("[-] [os.Create(savePath)] Error: ", err)
+	}
 	defer out.Close()
 
 	_, err = io.Copy(out, resp.Body)
